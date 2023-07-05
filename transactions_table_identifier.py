@@ -25,7 +25,7 @@ class handle_by_filetype:
             identification_threshold = 0.75
             fuzzy_pass_threshold = 80
             while identification_threshold >= 0.50:
-                output = self.csv_handler(filepath)
+                output = self.csv_handler(filepath,identification_threshold,fuzzy_pass_threshold)
                 if output:
                     break
                 identification_threshold -= 0.825
@@ -34,7 +34,7 @@ class handle_by_filetype:
             identification_threshold = 0.75
             fuzzy_pass_threshold = 80
             while identification_threshold >= 0.50:
-                output = self.excel_handler(filepath)
+                output = self.excel_handler(filepath,identification_threshold,fuzzy_pass_threshold)
                 if output:
                     break
                 identification_threshold -= 0.825

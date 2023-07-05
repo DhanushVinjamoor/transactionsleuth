@@ -19,7 +19,7 @@ class pdf_reader:
 
                 tested_elements=self.identifyTableDimensions(updated_dataframe)
 
-                print(tested_elements[0])
+                print("first attempt result is:"+str(tested_elements[0]))
 
                 if tested_elements[0]:
                     for tables in tested_elements[1]:
@@ -54,6 +54,7 @@ class pdf_reader:
         table_found_flag=False
 
         for index, row in df.iterrows():
+            print("Starting row: "+str(index))
             if table_start is not None:
                 pass
                 # todo is null is not the way to go, as that is usually cleaned up by the library. consider using the
@@ -145,6 +146,7 @@ class pdf_reader:
 
                     if current_value in outer_loop_values:
                         passed_cells_counter += 1
+                        print("Passed value"+current_value)
                         popped_indices.append(index_of_main_possible_column_names_array)
                         possible_column_names.pop(index_of_main_possible_column_names_array)
                         break
@@ -154,6 +156,7 @@ class pdf_reader:
                         # and each value is tested against the possible column values array
 
                         if fuzz.partial_ratio(current_value.lower(), testvalues) >= fuzz_algo_threshold:
+                            print("Passed value" + current_value)
                             passed_cells_counter += 1
                             value_passed = True
                             break
@@ -192,7 +195,14 @@ class pdf_reader:
                             expected_headings_flag = False
 
                     if heading_pattern_flag and expected_headings_flag:
+                        print(" Cells tested: " + str(tested_cells_counter) + " Cells passed: " + str(passed_cells_counter))
                         return True
+                    else:
+                        print(" Cells tested: " + str(tested_cells_counter) + " Cells passed: " + str(passed_cells_counter))
+                        return False
+                else:
+                    print(" Cells tested: " + str(tested_cells_counter) + " Cells passed: " + str(passed_cells_counter))
+                    return False
 
 
     def identify_empty_space_pattern(self, full_row):
