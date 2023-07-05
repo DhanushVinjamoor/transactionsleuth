@@ -12,6 +12,8 @@ class pdf_reader:
 
     def clean_results(self,full_data):
 
+        final_results=[]
+
         for identified_elements in full_data:
 
             try:
@@ -23,9 +25,8 @@ class pdf_reader:
 
                 if tested_elements[0]:
                     for tables in tested_elements[1]:
-                        print(tables)
+                        final_results.append(updated_dataframe[tables[0]:tables[1]+1])
                 else:
-
                     identification_threshold = 0.67
                     fuzzy_pass_threshold = 80
                     while identification_threshold >= 0.50:
@@ -37,12 +38,17 @@ class pdf_reader:
                             for tables in output[1]:
                                 print(tables)
                                 break
-                        identification_threshold -= 0.525
+                        identification_threshold -= 0.08
                         fuzzy_pass_threshold -= 5
+
             except ValueError:
                 print("Unable to convert to dataframe")
 
-    def identifyTableDimensions(self, df,fuzz_algo=90,pass_value=0.75):
+        for identified_tables in final_results:
+            print(identified_tables)
+
+
+    def identifyTableDimensions(self, df,fuzz_algo=90,pass_value=0.60):
 
         column_names = df.columns
 
@@ -54,9 +60,8 @@ class pdf_reader:
         table_found_flag=False
 
         for index, row in df.iterrows():
-            print("Starting row: "+str(index))
+            #print("Starting row: "+str(index))
             if table_start is not None:
-                pass
                 # todo is null is not the way to go, as that is usually cleaned up by the library. consider using the
                 #  same same for headings to identify debris? consider adding a check to see if there are no numbers
                 #  in a specific row to identify the last row
@@ -73,7 +78,12 @@ class pdf_reader:
                         num_flag = True
                         break
 
-                if num_flag:
+                if not num_flag:
+                    table_end = index-1
+                    tables.append((table_start, table_end))
+                    table_start = None
+                    table_end = None
+                elif index == (len(df) - 1) and table_start is not None:
                     table_end = index
                     tables.append((table_start, table_end))
                     table_start = None
@@ -83,6 +93,7 @@ class pdf_reader:
                 if self.identify_header(row,column_names,fuzz_algo,pass_value):
                     table_start=index
                     table_found_flag=True
+
 
         return (table_found_flag,tables)
 
@@ -121,7 +132,10 @@ class pdf_reader:
 
         popped_indices = []
 
-        for names in column_names:
+        #print("row length is: " + str(len(column_names)))
+
+        for iteration,names in enumerate(column_names):
+
             if (pd.isna(row[names]) or pd.isnull(row[names])):
                 empty_cells_counter += 1
             else:
@@ -146,7 +160,7 @@ class pdf_reader:
 
                     if current_value in outer_loop_values:
                         passed_cells_counter += 1
-                        print("Passed value"+current_value)
+                        #print("Passed value"+current_value)
                         popped_indices.append(index_of_main_possible_column_names_array)
                         possible_column_names.pop(index_of_main_possible_column_names_array)
                         break
@@ -156,7 +170,7 @@ class pdf_reader:
                         # and each value is tested against the possible column values array
 
                         if fuzz.partial_ratio(current_value.lower(), testvalues) >= fuzz_algo_threshold:
-                            print("Passed value" + current_value)
+                            #print("Passed value" + current_value)
                             passed_cells_counter += 1
                             value_passed = True
                             break
@@ -172,7 +186,7 @@ class pdf_reader:
                         break
                     else:
                         index_of_main_possible_column_names_array += 1
-
+                # todo add a check to make sure this test occurs only at end of series
                 if ((
                             passed_cells_counter / tested_cells_counter) >= pass_value) and tested_cells_counter >= 4:
 
@@ -195,15 +209,24 @@ class pdf_reader:
                             expected_headings_flag = False
 
                     if heading_pattern_flag and expected_headings_flag:
-                        print(" Cells tested: " + str(tested_cells_counter) + " Cells passed: " + str(passed_cells_counter))
+                        print(" Cells tested: " + str(tested_cells_counter) + " Cells passed: " + str(passed_cells_counter)+" Cells empty: "+str(empty_cells_counter))
                         return True
                     else:
-                        print(" Cells tested: " + str(tested_cells_counter) + " Cells passed: " + str(passed_cells_counter))
+                        print(" Cells tested: " + str(tested_cells_counter) + " Cells passed: " + str(passed_cells_counter)+" Cells empty: "+str(empty_cells_counter))
                         return False
-                else:
-                    print(" Cells tested: " + str(tested_cells_counter) + " Cells passed: " + str(passed_cells_counter))
-                    return False
+        return False
 
+
+    def check_compatibility(self,first_row,second_row):
+        # This is a function which will take two rows, iterate through the values of both, and if the datatypes of
+        # both values match for atleast 75% of tested columns, will return True.
+
+        # removing any set column names, as the rows will be iterated together in the same loop
+
+        first_row.columns=None
+        second_row.columns=None
+
+        #
 
     def identify_empty_space_pattern(self, full_row):
         previous_cell_is_empty = False
@@ -245,6 +268,6 @@ if __name__=="__main__":
 
     tables_list=classhandle.get_tables('canara.pdf')
 
-    print(tables_list)
+    #print(tables_list)
 
     classhandle.clean_results(tables_list)

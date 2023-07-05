@@ -28,7 +28,7 @@ class handle_by_filetype:
                 output = self.csv_handler(filepath,identification_threshold,fuzzy_pass_threshold)
                 if output:
                     break
-                identification_threshold -= 0.825
+                identification_threshold -= 0.0825
                 fuzzy_pass_threshold -= 5
         elif extension == ".xlsx" or extension == ".xls":
             identification_threshold = 0.75
@@ -37,7 +37,7 @@ class handle_by_filetype:
                 output = self.excel_handler(filepath,identification_threshold,fuzzy_pass_threshold)
                 if output:
                     break
-                identification_threshold -= 0.825
+                identification_threshold -= 0.0825
                 fuzzy_pass_threshold -= 5
         elif extension == ".pdf":
             pass
@@ -80,6 +80,11 @@ class handle_by_filetype:
                     tables.append((table_start, table_end))
                     table_start = None
                     table_end = None
+                elif index == (len(df) - 1) and table_start is not None:
+                    table_end = index
+                    tables.append((table_start, table_end))
+                    table_start = None
+                    table_end = None
                 elif not row.isnull().all() and table_start is None:
                     # code to check the column values against a list of common titles
 
@@ -112,7 +117,7 @@ class handle_by_filetype:
                             'running balance', 'available balance'], ["withdrawal", 'debit'],
                         ['deposit',
                          'credit'],
-                        ["date", "day", "time", 'transaction date', 'posting date', 'account activity date',
+                        ["date", "day", "time", 'transaction date', 'posting date', 'account activity date',"post date",
                          'statement date', 'entry date', 'record date', 'event date',
                          'transaction timestamp', 'financial activity date', 'recorded date','dt.','dt','txn dt']
                     ]
@@ -185,6 +190,7 @@ class handle_by_filetype:
                                 else:
                                     index_of_main_possible_column_names_array += 1
 
+                            # todo add a check to make sure this test occurs only at end of series
                             if ((
                                         passed_cells_counter / tested_cells_counter) >= pass_value) and tested_cells_counter >= 4:
 
