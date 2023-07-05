@@ -105,7 +105,7 @@ class handle_by_filetype:
                                                                                   'transaction amount', 'currency'],
                         ['account', 'account number', 'account name', 'counterparty'], ['reference',
                                                                                         'transaction reference', 'UTR',
-                                                                                        'chq.', 'cheque', 'ref no.'],
+                                                                                        'chq.', 'cheque', 'ref no.','ref chq no.'],
                         ['category', 'type'],
                         ['balance', 'opening balance'], [
                             'closing balance', "balance",
@@ -114,7 +114,7 @@ class handle_by_filetype:
                          'credit'],
                         ["date", "day", "time", 'transaction date', 'posting date', 'account activity date',
                          'statement date', 'entry date', 'record date', 'event date',
-                         'transaction timestamp', 'financial activity date', 'recorded date']
+                         'transaction timestamp', 'financial activity date', 'recorded date','dt.','dt','txn dt']
                     ]
 
                     # index - 0:Narration,1:Amount,3:counterpart,4:reference,5:Category,6:Op.Bal,7.cl.bal,8.dr,8.cr,

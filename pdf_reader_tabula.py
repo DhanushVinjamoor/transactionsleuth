@@ -13,9 +13,36 @@ class pdf_reader:
     def clean_results(self,full_data):
 
         for identified_elements in full_data:
-            pass
 
-    def identifyTableDimensions(self, df):
+            try:
+                updated_dataframe=pd.DataFrame(identified_elements)
+
+                tested_elements=self.identifyTableDimensions(updated_dataframe)
+
+                print(tested_elements[0])
+
+                if tested_elements[0]:
+                    for tables in tested_elements[1]:
+                        print(tables)
+                else:
+
+                    identification_threshold = 0.67
+                    fuzzy_pass_threshold = 80
+                    while identification_threshold >= 0.50:
+                        print("First attempt failed, trying again")
+                        output = self.identifyTableDimensions(updated_dataframe,fuzzy_pass_threshold,identification_threshold)
+                        print(output[0])
+                        if output[0]:
+                            print("Table identified!")
+                            for tables in output[1]:
+                                print(tables)
+                                break
+                        identification_threshold -= 0.525
+                        fuzzy_pass_threshold -= 5
+            except ValueError:
+                print("Unable to convert to dataframe")
+
+    def identifyTableDimensions(self, df,fuzz_algo=90,pass_value=0.75):
 
         column_names = df.columns
 
@@ -24,6 +51,8 @@ class pdf_reader:
         table_start = None
         table_end = None
 
+        table_found_flag=False
+
         for index, row in df.iterrows():
             if table_start is not None:
                 pass
@@ -31,17 +60,32 @@ class pdf_reader:
                 #  same same for headings to identify debris? consider adding a check to see if there are no numbers
                 #  in a specific row to identify the last row
 
-                end_flag=False
+                #end_flag=False
 
+                num_flag=False
 
+                for names in column_names:
+                    if isinstance(row[names], (int, float)):
+                        num_flag=True
+                        break
+                    elif self.is_number(row[names]):
+                        num_flag = True
+                        break
 
-                table_end = index
-                tables.append((table_start, table_end))
-                table_start = None
-                table_end = None
+                if num_flag:
+                    table_end = index
+                    tables.append((table_start, table_end))
+                    table_start = None
+                    table_end = None
+
             elif not row.isnull().all() and table_start is None:
-                if self.identify_header(row,column_names):
+                if self.identify_header(row,column_names,fuzz_algo,pass_value):
                     table_start=index
+                    table_found_flag=True
+
+        return (table_found_flag,tables)
+
+
 
     def identify_header(self,row,column_names,fuzz_algo_threshold=90,pass_value=0.75):
 
@@ -62,7 +106,7 @@ class pdf_reader:
                                                                       'transaction amount', 'currency'],
             ['account', 'account number', 'account name', 'counterparty'], ['reference',
                                                                             'transaction reference', 'UTR',
-                                                                            'chq.', 'cheque', 'ref no.'],
+                                                                            'chq.', 'cheque', 'ref no.', 'ref chq no.'],
             ['category', 'type'],
             ['balance', 'opening balance'], [
                 'closing balance', "balance",
@@ -71,7 +115,7 @@ class pdf_reader:
              'credit'],
             ["date", "day", "time", 'transaction date', 'posting date', 'account activity date',
              'statement date', 'entry date', 'record date', 'event date',
-             'transaction timestamp', 'financial activity date', 'recorded date']
+             'transaction timestamp', 'financial activity date', 'recorded date', 'dt.', 'dt', 'txn dt']
         ]
 
         popped_indices = []
@@ -178,8 +222,19 @@ class pdf_reader:
             return False
         return True
 
+    def is_number(self,string_test):
+        try:
+            float(string_test)  # or int(string) for integer check
+            return True
+        except ValueError:
+            return False
 
 
-classhandle=pdf_reader()
+if __name__=="__main__":
+    classhandle=pdf_reader()
 
-print(classhandle.get_tables('canara.pdf'))
+    tables_list=classhandle.get_tables('canara.pdf')
+
+    print(tables_list)
+
+    classhandle.clean_results(tables_list)
