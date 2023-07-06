@@ -137,25 +137,11 @@ class handle_by_filetype:
 
                     # todo consider implementing a way to populate the below listings using pyDictionary
 
-                    possible_column_names = [[
-                        'description', 'transaction description', 'details', 'transaction details', 'description',
-                        'memo', 'transaction details',
-                        'remarks', "narration",
-                        'explanation', 'comment', 'note', 'purpose', 'message'], ['amount',
-                                                                                  'transaction amount', 'currency'],
-                        ['account', 'account number', 'account name', 'counterparty'], ['reference',
-                                                                                        'transaction reference', 'UTR',
-                                                                                        'chq.', 'cheque', 'ref no.','ref chq no.'],
-                        ['category', 'type'],
-                        ['balance', 'opening balance'], [
-                            'closing balance', "balance",
-                            'running balance', 'available balance'], ["withdrawal", 'debit'],
-                        ['deposit',
-                         'credit'],
-                        ["date", "day", "time", 'transaction date', 'posting date', 'account activity date',"post date",
-                         'statement date', 'entry date', 'record date', 'event date',
-                         'transaction timestamp', 'financial activity date', 'recorded date','dt.','dt','txn dt']
-                    ]
+                    from definitions_library import columnsHolder
+
+                    classHandler=columnsHolder()
+
+                    possible_column_names = classHandler.possible_column_names
 
                     # index - 0:Narration,1:Amount,3:counterpart,4:reference,5:Category,6:Op.Bal,7.cl.bal,8.dr,8.cr,
                     # 9.date
@@ -315,25 +301,11 @@ class handle_by_filetype:
 
                 # todo consider implementing a way to populate the below listings using pyDictionary
 
-                possible_column_names = [[
-                    'description', 'transaction description', 'details', 'transaction details', 'description',
-                    'memo', 'transaction details',
-                    'remarks', "narration",
-                    'explanation', 'comment', 'note', 'purpose', 'message'], ['amount',
-                                                                              'transaction amount', 'currency'],
-                    ['account', 'account number', 'account name', 'counterparty'], ['reference',
-                                                                                    'transaction reference', 'UTR',
-                                                                                    'chq.', 'cheque', 'ref no.'],
-                    ['category', 'type'],
-                    ['balance', 'opening balance'], [
-                        'closing balance', "balance",
-                        'running balance', 'available balance'], ["withdrawal", 'debit'],
-                    ['deposit',
-                     'credit'],
-                    ["date", "day", "time", 'transaction date', 'posting date', 'account activity date',
-                     'statement date', 'entry date', 'record date', 'event date',
-                     'transaction timestamp', 'financial activity date', 'recorded date']
-                ]
+                from definitions_library import columnsHolder
+
+                classHandler = columnsHolder()
+
+                possible_column_names = classHandler.possible_column_names
 
                 # index - 0:Narration,1:Amount,3:counterpart,4:reference,5:Category,6:Op.Bal,7.cl.bal,8.dr,8.cr,
                 # 9.date
@@ -495,10 +467,10 @@ class handle_by_filetype:
 
 
 if __name__=="__main__":
-    test_path = "ICICI NRO ac statement 2021-22.pdf"
+    test_path = "Indusnd.pdf"
 
     test_handler = handle_by_filetype()
 
     result=test_handler.mainHandler(test_path)
 
-    test_handler.output_handler(flag="spreadsheet",dataframes=result)
+    test_handler.output_handler(flag="spreadsheet",dataframes=result,outputpath="indusnd")
