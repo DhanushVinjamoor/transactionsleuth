@@ -7,12 +7,13 @@ current_path = os.getcwd()
 # Add the current directory to the system path
 sys.path.append(current_path)
 
+import pandas as pd
 
 # print(sys.path)
 
 class handle_by_filetype:
 
-    def __init__(self, filepath):
+    def mainHandler(self, filepath,password=None):
 
         import os
 
@@ -35,12 +36,25 @@ class handle_by_filetype:
             fuzzy_pass_threshold = 80
             while identification_threshold >= 0.50:
                 output = self.excel_handler(filepath,identification_threshold,fuzzy_pass_threshold)
-                if output:
-                    break
+                if output[0]:
+                    return output[1]
+
                 identification_threshold -= 0.0825
                 fuzzy_pass_threshold -= 5
+
+            # if no values are identified by the algo, return false
+            return False
         elif extension == ".pdf":
-            pass
+            import pdf_reader_tabula as pdfr
+            classhandle = pdfr.pdf_reader()
+
+            tables_list = classhandle.get_tables(filepath,password)
+
+            tables_list=classhandle.clean_results(tables_list)
+
+            if tables_list[0]:
+                return tables_list[1]
+
         else:
             raise TypeError
 
@@ -217,18 +231,19 @@ class handle_by_filetype:
                                     break
 
             # Print the sheet name
-            print("Sheet Name:", sheet_name)
+            #print("Sheet Name:", sheet_name)
 
             if not len(tables) == 0:
                 # Print each table
+                output_holder_variable=[]
                 for table in tables:
                     start, end = table
-                    table_data = df[start:end]
-                    print(table_data)
-                    print('\n')  # Add a newline for better readability
-                return True
+                    output_holder_variable.append(df[start:end])
+                    #print(table_data)
+                    #print('\n')  # Add a newline for better readability
+                return [True,output_holder_variable]
             else:
-                return False
+                return [False]
 
     def csv_handler(self, csv_file_path, overall_identification_threshold=0.75, fuzz_algo_threshold=80):
         import pandas as pd
@@ -398,14 +413,36 @@ class handle_by_filetype:
 
         if not len(tables) == 0:
             # Print each table
+            output_holder_variable = []
             for table in tables:
                 start, end = table
-                table_data = df[start:end]
-                print(table_data)
-                print('\n')  # Add a newline for better readability
-            return True
+                output_holder_variable.append(df[start:end])
+                # print(table_data)
+                # print('\n')  # Add a newline for better readability
+            return [True, output_holder_variable]
         else:
-            return False
+            return [False]
+
+    def output_handler(self,flag:str,dataframes:list,outputpath="output"):
+        if flag.lower()=="print":
+            for dataframe in dataframes:
+                print(dataframe)
+        elif flag.lower()=="spreadsheet":
+            if len(dataframes)>1:
+                filename=outputpath+".xlsx"
+                with pd.ExcelWriter(filename) as writer:
+                    # Iterate over each DataFrame in the list and write it to a separate sheet
+                    for i, df in enumerate(dataframes):
+                        df.to_excel(writer, sheet_name=f'Sheet{i + 1}', index=False)
+            else:
+                filename = outputpath + ".csv"
+                with open(filename, 'w') as file:
+                    # Use 'to_csv' to write the DataFrame to the file
+                    dataframes[0].to_csv(file, index=False)
+        elif flag.lower()=="return":
+            return dataframes
+
+
 
     def identify_empty_space_pattern(self, full_row):
         previous_cell_is_empty = False
@@ -435,9 +472,13 @@ class handle_by_filetype:
         return True
 
 
-test_path = "HDFC_personal.xls"
+test_path = "canara.pdf"
 
 """
 """
 
-test_handler = handle_by_filetype(test_path)
+test_handler = handle_by_filetype()
+
+result=test_handler.mainHandler(test_path)
+
+test_handler.output_handler(flag="spreadsheet",dataframes=result)
