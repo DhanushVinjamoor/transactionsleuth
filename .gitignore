@@ -1,3 +1,8 @@
-*.xslx
+*.xlsx
 *.xls
 *.pdf
+*.csv
+/__pychache__
+\__pychache__
+/.idea
+\.idea
