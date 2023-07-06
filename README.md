@@ -50,7 +50,6 @@ license category: commercial
 license: trade secret 
 organization name: Arvi Solutions. 
 location: Chennai, Tamil Nadu 
-website: https://neurolex.ai 
 release date: 06-07-2023 
 
 This code (commercial) is hereby released under a trade secret license. 
