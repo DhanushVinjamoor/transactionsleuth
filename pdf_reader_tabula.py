@@ -70,6 +70,10 @@ class pdf_reader:
 
         table_found_flag = False
 
+        from definitions_library import columnsHolder
+
+        classHandler = columnsHolder()
+
         for index, row in df.iterrows():
             # print("Starting row: "+str(index))
             if table_start is not None:
@@ -115,9 +119,7 @@ class pdf_reader:
 
         empty_cells_counter = 0
 
-        from definitions_library import columnsHolder
 
-        classHandler = columnsHolder()
 
         possible_column_names = classHandler.possible_column_names
 

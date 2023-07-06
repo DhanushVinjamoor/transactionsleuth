@@ -96,6 +96,10 @@ class handle_by_filetype:
         from fuzzywuzzy import fuzz
         #from fuzzywuzzy import process
 
+        from definitions_library import columnsHolder
+
+        classHandler = columnsHolder()
+
         # Iterate over each sheet and print the table data
         for sheet_name in sheet_names:
             df = pd.read_excel(excel_file_path, sheet_name=sheet_name)
@@ -137,9 +141,7 @@ class handle_by_filetype:
 
                     # todo consider implementing a way to populate the below listings using pyDictionary
 
-                    from definitions_library import columnsHolder
 
-                    classHandler=columnsHolder()
 
                     possible_column_names = classHandler.possible_column_names
 
@@ -277,6 +279,10 @@ class handle_by_filetype:
         table_start = None
         table_end = None
 
+        from definitions_library import columnsHolder
+
+        classHandler = columnsHolder()
+
         for index, row in df.iterrows():
             if row.isnull().all() and table_start is not None:
                 # Found the end of the table
@@ -301,9 +307,7 @@ class handle_by_filetype:
 
                 # todo consider implementing a way to populate the below listings using pyDictionary
 
-                from definitions_library import columnsHolder
 
-                classHandler = columnsHolder()
 
                 possible_column_names = classHandler.possible_column_names
 
