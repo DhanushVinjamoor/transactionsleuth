@@ -73,9 +73,6 @@ class pdf_reader:
         for index, row in df.iterrows():
             # print("Starting row: "+str(index))
             if table_start is not None:
-                # todo is null is not the way to go, as that is usually cleaned up by the library. consider using the
-                #  same same for headings to identify debris? consider adding a check to see if there are no numbers
-                #  in a specific row to identify the last row
 
                 # end_flag=False
 

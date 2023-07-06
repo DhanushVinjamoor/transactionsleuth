@@ -54,6 +54,8 @@ class handle_by_filetype:
 
             if tables_list[0]:
                 return tables_list[1]
+            else:
+                return False
 
         else:
             raise TypeError
@@ -427,14 +429,20 @@ class handle_by_filetype:
         if flag.lower()=="print":
             for dataframe in dataframes:
                 print(dataframe)
-        elif flag.lower()=="spreadsheet":
-            if len(dataframes)>1:
-                filename=outputpath+".xlsx"
+        elif flag.lower()=="spreadsheet":\
+
+            if isinstance(dataframes, bool):
+                filename = outputpath + ".csv"
+                with open(filename, 'w') as file:
+                    # Use 'to_csv' to write the DataFrame to the file
+                    file.write(str(dataframes))
+            elif len(dataframes)>1:
+                filename = outputpath + ".xlsx"
                 with pd.ExcelWriter(filename) as writer:
                     # Iterate over each DataFrame in the list and write it to a separate sheet
                     for i, df in enumerate(dataframes):
                         df.to_excel(writer, sheet_name=f'Sheet{i + 1}', index=False)
-            else:
+            elif len(dataframes)==1:
                 filename = outputpath + ".csv"
                 with open(filename, 'w') as file:
                     # Use 'to_csv' to write the DataFrame to the file
@@ -472,13 +480,14 @@ class handle_by_filetype:
         return True
 
 
-test_path = "canara.pdf"
+if __name__=="__main__":
+    test_path = "bob_statement-unlocked.pdf"
 
-"""
-"""
+    """
+    """
 
-test_handler = handle_by_filetype()
+    test_handler = handle_by_filetype()
 
-result=test_handler.mainHandler(test_path)
+    result=test_handler.mainHandler(test_path)
 
-test_handler.output_handler(flag="spreadsheet",dataframes=result)
+    test_handler.output_handler(flag="spreadsheet",dataframes=result)
