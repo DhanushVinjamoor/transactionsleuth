@@ -1,0 +1,39 @@
+================================================ 
+          COMMERCIAL REPOSITORY                     
+================================================ 
+
+repository name: transactionsleuth
+repository version: 1.0 
+repository link: https://github.com/DhanushVinjamoor/transactionsleuth.git
+author: Dhanush Vinjamoor
+author contact: dhanushvinjamoor@gmail.com 
+description: code to find bank transactions within files 
+license category: commercial 
+license: trade secret 
+organization name: Arvi Solutions. 
+location: Chennai, Tamil Nadu 
+website: https://neurolex.ai 
+release date: 06-07-2023 
+
+This code (commercial) is hereby released under a trade secret license. 
+
+For more information, check out the license terms below. 
+
+================================================ 
+                LICENSE TERMS                      
+================================================ 
+
+Copyright (C) Arvi Solutions. - All Rights Reserved 
+* Unauthorized copying of this file, via any medium is strictly prohibited 
+* Proprietary and confidential 
+* Written by Dhanush Vinjamoor <dhanushvinjamoor@gmail.com>, 06-07-2023
+
+================================================ 
+                SERVICE STATEMENT                    
+================================================ 
+
+If you are using the code written for a larger project, we are 
+happy to consult with you and help you with deployment.
+
+We have helped a wide variety of enterprises - small businesses, 
+researchers, enterprises, and/or independent developers.  
