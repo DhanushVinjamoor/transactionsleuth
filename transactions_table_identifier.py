@@ -18,7 +18,7 @@ class handle_by_filetype:
     # transactions as a dataframe. Currently, csv, xlsx, xls and pdfs are supported. Note that pdfs are very
     # experimental.
 
-    # The tabula-py, re and pandas modules are required to be installed for this program to run
+    # The tabula-py, re and pandas modules are required to be installed for this program to run.
 
     # call the mainHandler method with the path of the file and the password. If there are no passwords,
     # do not provide the password argument. Note that passwords only work with pdf files. if you have csv or excel
@@ -28,7 +28,7 @@ class handle_by_filetype:
     # for output, you can pass the results of the mainHandler method to the output_handler method. set output flag to
     # print to print out the results, spreadsheet to get it in spreadsheet format. The filetype under spreadsheet
     # flag depends on the number of tables identified, if there is one, it will be csv, if more than one, it will be
-    # in xlsx. if the output if False, it means no tables were identified
+    # in xlsx. if the output is False, it means no tables were identified.
 
 
 
@@ -495,10 +495,7 @@ class handle_by_filetype:
 
 
 if __name__=="__main__":
-    test_path = "bob_statement-unlocked.pdf"
-
-    """
-    """
+    test_path = "ICICI NRO ac statement 2021-22.pdf"
 
     test_handler = handle_by_filetype()
 
