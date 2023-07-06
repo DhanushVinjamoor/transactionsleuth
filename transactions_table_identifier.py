@@ -1,5 +1,6 @@
 import os
 import sys
+import pandas as pd
 
 # Get the current directory path
 current_path = os.getcwd()
@@ -7,11 +8,29 @@ current_path = os.getcwd()
 # Add the current directory to the system path
 sys.path.append(current_path)
 
-import pandas as pd
+
 
 # print(sys.path)
 
 class handle_by_filetype:
+
+    # code to take in a file, identify the table containing bank transactions in it, and then return those
+    # transactions as a dataframe. Currently, csv, xlsx, xls and pdfs are supported. Note that pdfs are very
+    # experimental.
+
+    # The tabula-py, re and pandas modules are required to be installed for this program to run
+
+    # call the mainHandler method with the path of the file and the password. If there are no passwords,
+    # do not provide the password argument. Note that passwords only work with pdf files. if you have csv or excel
+    # files with passwords, use the encryption module of Excel to remove the encryption, or alternatively,
+    # use one of the online solutions available.
+
+    # for output, you can pass the results of the mainHandler method to the output_handler method. set output flag to
+    # print to print out the results, spreadsheet to get it in spreadsheet format. The filetype under spreadsheet
+    # flag depends on the number of tables identified, if there is one, it will be csv, if more than one, it will be
+    # in xlsx. if the output if False, it means no tables were identified
+
+
 
     def mainHandler(self, filepath,password=None):
 
@@ -75,7 +94,7 @@ class handle_by_filetype:
         # required, and to ensure that import statements do not occur within the loop.
 
         from fuzzywuzzy import fuzz
-        from fuzzywuzzy import process
+        #from fuzzywuzzy import process
 
         # Iterate over each sheet and print the table data
         for sheet_name in sheet_names:
@@ -241,8 +260,6 @@ class handle_by_filetype:
                 for table in tables:
                     start, end = table
                     output_holder_variable.append(df[start:end])
-                    #print(table_data)
-                    #print('\n')  # Add a newline for better readability
                 return [True,output_holder_variable]
             else:
                 return [False]
@@ -260,7 +277,7 @@ class handle_by_filetype:
         # required, and to ensure that import statements do not occur within the loop.
 
         from fuzzywuzzy import fuzz
-        from fuzzywuzzy import process
+        #from fuzzywuzzy import process
 
         # Iterate over each sheet and print the table data
 
@@ -419,8 +436,6 @@ class handle_by_filetype:
             for table in tables:
                 start, end = table
                 output_holder_variable.append(df[start:end])
-                # print(table_data)
-                # print('\n')  # Add a newline for better readability
             return [True, output_holder_variable]
         else:
             return [False]
@@ -429,8 +444,7 @@ class handle_by_filetype:
         if flag.lower()=="print":
             for dataframe in dataframes:
                 print(dataframe)
-        elif flag.lower()=="spreadsheet":\
-
+        elif flag.lower()=="spreadsheet":
             if isinstance(dataframes, bool):
                 filename = outputpath + ".csv"
                 with open(filename, 'w') as file:
