@@ -12,7 +12,9 @@ code to take in a file, identify the table containing bank transactions in it, a
 
 The tabula-py, re and pandas modules are required to be installed for this program to run.
 
-call the mainHandler method with the path of the file and the password. If there are no passwords,do not provide the password argument. Note that passwords only work with pdf files. if you have csv or excel files with passwords, use the encryption module of Excel to remove the encryption, or alternatively,use one of the online solutions available.
+The transactions_table_identifier.py is the main file, which contains the class to be called to utilise the program.
+
+Call the mainHandler method with the path of the file and the password. If there are no passwords,do not provide the password argument. Note that passwords only work with pdf files. if you have csv or excel files with passwords, use the encryption module of Excel to remove the encryption, or alternatively,use one of the online solutions available.
 
 for output, you can pass the results of the mainHandler method to the output_handler method. set output flag to print to print out the results, spreadsheet to get it in spreadsheet format. The filetype under spreadsheet flag depends on the number of tables identified, if there is one, it will be csv, if more than one, it will be in xlsx. if the output is False, it means no tables were identified.
 
