@@ -6,3 +6,6 @@
 \__pychache__
 /.idea
 \.idea
+*.jpg
+/temp_directory
+\temp_directory
