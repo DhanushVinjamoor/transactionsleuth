@@ -11,6 +11,7 @@ class userCropTable:
         self.image_path=image_path
         self.createAlerts()
         self.initiateMainLoop()
+        self.output_path=None
 
     def shape_selection(self,event, x, y, flags, param):
 
@@ -93,6 +94,7 @@ class userCropTable:
             # Save the image to the new directory
             save_path = os.path.join(directory_name, self.image_path)
             cv2.imwrite(save_path, image)
+            self.output_path=save_path
             print("Image saved successfully.")
         else:
             print("Failed to load the image.")
