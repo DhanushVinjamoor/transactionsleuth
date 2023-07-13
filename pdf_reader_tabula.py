@@ -102,13 +102,13 @@ class pdf_reader:
                     table_end = None
 
             elif not row.isnull().all() and table_start is None:
-                if self.identify_header(row, column_names, fuzz_algo, pass_value):
+                if self.identify_header(row, column_names,classHandler, fuzz_algo, pass_value):
                     table_start = index
                     table_found_flag = True
 
         return (table_found_flag, tables)
 
-    def identify_header(self, row, column_names, fuzz_algo_threshold=90, pass_value=0.75):
+    def identify_header(self, row, column_names,classHandler, fuzz_algo_threshold=90, pass_value=0.75):
 
         # the identification algorithm used here is similar to the one used for .xlsx files, please refer there for
         # detailed documentation
@@ -284,9 +284,11 @@ class pdf_reader:
 if __name__ == "__main__":
     classhandle = pdf_reader()
 
-    tables_list = classhandle.get_tables('FED.pdf')
+    tables_list = classhandle.get_tables('Indusnd.pdf')
 
     # print(tables_list)
 
     output=classhandle.clean_results(tables_list)
+
+    print(output)
 
