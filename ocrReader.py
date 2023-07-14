@@ -31,7 +31,7 @@ class fileHandle:
                 else:
                     testingClassHandler = testTables()
                     output = autoRecognitionHandler.crop_and_process_image(userRecognitionHandler.output_path, 0, 0, 0,
-                                                                           0, testingClassHandler)
+                                                                           0, testingClassHandler,"7737")
                     return output
 
 
@@ -46,7 +46,7 @@ class fileHandle:
                 autoRecognitionHandler = findTable()
                 testingClassHandler = testTables()
                 output = autoRecognitionHandler.crop_and_process_image(userRecognitionHandler.output_path, 0, 0, 0, 0,
-                                                                       testingClassHandler)
+                                                                       testingClassHandler,"7737")
                 return output
 
 
@@ -88,11 +88,11 @@ class findTable:
         # Draw bounding rectangles around the detected tables
         result = image.copy()
         testing_class = testTables()
-        for (x1, y1, x2, y2) in tables:
+        for count,(x1, y1, x2, y2) in enumerate(tables):
             # print("started testing loop")
             cv2.rectangle(result, (x1, y1), (x2, y2), (0, 255, 0), 2)
             self.user_flag = False
-            output_of_processed_image = self.crop_and_process_image(image_path, x1, y1, x2, y2, testing_class)
+            output_of_processed_image = self.crop_and_process_image(image_path, x1, y1, x2, y2, testing_class,count)
             if output_of_processed_image[0]:
                 # Display the result
                 return output_of_processed_image
@@ -104,9 +104,11 @@ class findTable:
         # cv2.destroyAllWindows()
         return [False]
 
-    def scan_image(self, image_path):
+    def scan_image(self, image_path,count):
         import pytesseract
         # import pandas as pd
+
+        print(image_path)
 
         pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
 
@@ -137,9 +139,11 @@ class findTable:
         # Create a DataFrame from the extracted data
         df = pd.DataFrame(data)
 
+        self.output_handler(flag="spreadsheet",outputpath=("ocrtest"+str(count)),dataframes=[df])
+
         return df
 
-    def crop_and_process_image(self, file_path, x1, y1, x2, y2, testing_class):
+    def crop_and_process_image(self, file_path, x1, y1, x2, y2, testing_class,count):
         # this is an intermediary function to crop an image to the defined thresholds, convert it into a dataframe
         # with scan_image method of this class, and then print out the results
 
@@ -156,8 +160,9 @@ class findTable:
 
             # Crop the copied image using the defined coordinates
             cropped_image = copied_image[y1:y2, x1:x2]
+            possible_df = self.scan_image(cropped_image,count)
         else:
-            cropped_image = original_image
+            possible_df=self.scan_image(original_image,count)
 
         # Perform some operations on the cropped image
         # processed_image = cv2.cvtColor(cropped_image, cv2.COLOR_BGR2GRAY)
@@ -167,7 +172,7 @@ class findTable:
         # cv2.imwrite('processed_image.jpg', cropped_image)
 
         # convert to df and test for headers
-        possible_df = self.scan_image(cropped_image)
+
 
         # The tests are very similar to the tests performed on pdfs and csvs, please refer the same for detailed
         # documentation
@@ -229,6 +234,31 @@ class findTable:
         root.mainloop()
 
         # return user_flag
+
+    def output_handler(self,flag:str,dataframes:list,outputpath="output"):
+        if flag.lower()=="print":
+            for dataframe in dataframes:
+                print(dataframe)
+        elif flag.lower()=="spreadsheet":
+            if isinstance(dataframes, bool):
+                filename = outputpath + ".csv"
+                with open(filename, 'w') as file:
+                    # Use 'to_csv' to write the DataFrame to the file
+                    file.write(str(dataframes))
+            elif len(dataframes)>1:
+                filename = outputpath + ".xlsx"
+                with pd.ExcelWriter(filename) as writer:
+                    # Iterate over each DataFrame in the list and write it to a separate sheet
+                    for i, df in enumerate(dataframes):
+                        df.to_excel(writer, sheet_name=f'Sheet{i + 1}', index=False)
+            elif len(dataframes)==1:
+                filename = outputpath + ".csv"
+                with open(filename, 'w') as file:
+                    # Use 'to_csv' to write the DataFrame to the file
+                    dataframes[0].to_csv(file, index=False)
+        elif flag.lower()=="return":
+            return dataframes
+
 
 
 class testTables:
@@ -453,6 +483,8 @@ class testTables:
 
 
 if __name__ == "__main__":
-    testerHandler = findTable()
-    outputvalue = testerHandler.findTablesInImageCV("testfiles\\hdfc.jpg")
+    testerHandler = fileHandle()
+    outputvalue = testerHandler.imagesTestingHandler("hdfc.jpg")
     print(outputvalue)
+
+# todo ensure temp directory is removed at end of execution

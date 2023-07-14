@@ -122,3 +122,4 @@ if __name__=="__main__":
 
     classHandle=userCropTable(path)
 
+# todo add checks for backslashes in path name

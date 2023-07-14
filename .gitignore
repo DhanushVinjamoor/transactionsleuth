@@ -4,8 +4,11 @@
 *.csv
 /__pychache__
 \__pychache__
+__pychache__\
 /.idea
 \.idea
 *.jpg
 /temp_directory
 \temp_directory
+\versions
+/versions
