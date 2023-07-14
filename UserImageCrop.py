@@ -10,8 +10,9 @@ class userCropTable:
         self.ref_point = []
         self.image_path=image_path
         self.createAlerts()
+        self.output_path = None
         self.initiateMainLoop()
-        self.output_path=None
+
 
     def shape_selection(self,event, x, y, flags, param):
 

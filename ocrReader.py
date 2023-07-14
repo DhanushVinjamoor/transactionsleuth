@@ -4,14 +4,55 @@ import pandas as pd
 from fuzzywuzzy import fuzz
 import cv2
 
-#user_flag = False
+
+# user_flag = False
 
 class fileHandle:
-    pass
+
+    def __init__(self):
+        pass
+
+    def pdfTestingHandler(self,pdf_path,mode="self"):
+        pass
+
+    def imagesTestingHandler(self, image_path: str, mode="self"):
+        if mode == "self":
+            autoRecognitionHandler = findTable()
+            outputvalue = autoRecognitionHandler.findTablesInImageCV(image_path)
+            if outputvalue[0]:
+                return outputvalue
+            else:
+                import UserImageCrop as UIC
+
+                userRecognitionHandler = UIC.userCropTable(image_path)
+
+                if userRecognitionHandler.output_path is None:
+                    return [False]
+                else:
+                    testingClassHandler = testTables()
+                    output = autoRecognitionHandler.crop_and_process_image(userRecognitionHandler.output_path, 0, 0, 0,
+                                                                           0, testingClassHandler)
+                    return output
+
+
+        else:
+            import UserImageCrop as UIC
+
+            userRecognitionHandler = UIC.userCropTable(image_path)
+
+            if userRecognitionHandler.output_path is None:
+                return [False]
+            else:
+                autoRecognitionHandler = findTable()
+                testingClassHandler = testTables()
+                output = autoRecognitionHandler.crop_and_process_image(userRecognitionHandler.output_path, 0, 0, 0, 0,
+                                                                       testingClassHandler)
+                return output
+
 
 class findTable:
 
-    def findTablesInImageCV(self,image_path):
+    def findTablesInImageCV(self, image_path):
         # This is the main function within this class to hook onto. Hook onto this function if you have a image
         # that you would like to analyse for tables
 
@@ -48,7 +89,7 @@ class findTable:
         result = image.copy()
         testing_class = testTables()
         for (x1, y1, x2, y2) in tables:
-            #print("started testing loop")
+            # print("started testing loop")
             cv2.rectangle(result, (x1, y1), (x2, y2), (0, 255, 0), 2)
             self.user_flag = False
             output_of_processed_image = self.crop_and_process_image(image_path, x1, y1, x2, y2, testing_class)
@@ -58,22 +99,21 @@ class findTable:
             else:
                 continue
         # Display the result
-        #cv2.imshow('Detected Tables', result)
-        #cv2.waitKey(0)
-        #cv2.destroyAllWindows()
+        # cv2.imshow('Detected Tables', result)
+        # cv2.waitKey(0)
+        # cv2.destroyAllWindows()
         return [False]
 
-
-    def scan_image(self,image_path):
+    def scan_image(self, image_path):
         import pytesseract
-        #import pandas as pd
+        # import pandas as pd
 
         pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
 
         # Perform OCR using pytesseract
         text = pytesseract.image_to_string(image_path)
 
-        #print(text)
+        # print(text)
 
         # Split the extracted text into lines
         lines = text.split("\n")
@@ -99,29 +139,32 @@ class findTable:
 
         return df
 
-    def crop_and_process_image(self,file_path, x1, y1, x2, y2, testing_class):
+    def crop_and_process_image(self, file_path, x1, y1, x2, y2, testing_class):
         # this is an intermediary function to crop an image to the defined thresholds, convert it into a dataframe
         # with scan_image method of this class, and then print out the results
 
         # Read the original image
         original_image = cv2.imread(file_path)
 
-        # Create a copy of the original image
-        copied_image = original_image.copy()
+        if not x1 == y1 == x2 == y2 == 0:
+            # Create a copy of the original image
+            copied_image = original_image.copy()
 
-        # Define the cropping coordinates
-        x1, y1 = x1, y1  # Top-left corner of the cropped region
-        # x2, y2 = x1 + 100, y1 + 100  # Bottom-right corner of the cropped region
+            # Define the cropping coordinates
+            # x1, y1 = x1, y1  # Top-left corner of the cropped region
+            # x2, y2 = x1 + 100, y1 + 100  # Bottom-right corner of the cropped region
 
-        # Crop the copied image using the defined coordinates
-        cropped_image = copied_image[y1:y2, x1:x2]
+            # Crop the copied image using the defined coordinates
+            cropped_image = copied_image[y1:y2, x1:x2]
+        else:
+            cropped_image = original_image
 
         # Perform some operations on the cropped image
         # processed_image = cv2.cvtColor(cropped_image, cv2.COLOR_BGR2GRAY)
         # processed_image = cv2.GaussianBlur(processed_image, (5, 5), 0)
 
         # Save the processed image
-        #cv2.imwrite('processed_image.jpg', cropped_image)
+        # cv2.imwrite('processed_image.jpg', cropped_image)
 
         # convert to df and test for headers
         possible_df = self.scan_image(cropped_image)
@@ -142,26 +185,26 @@ class findTable:
                 self.displayOutputToUser(possible_df[start:end])
 
                 if self.user_flag:
-            #os.remove('processed_image.jpg')
-                    return [True,possible_df[start:end]]
+                    # os.remove('processed_image.jpg')
+                    return [True, possible_df[start:end]]
             # if none of the identified tables in the above function satisfy user requirements, return false
             return [False]
         else:
             # Delete the cropped image
-            #os.remove('processed_image.jpg')
+            # os.remove('processed_image.jpg')
             return [False]
 
-    def displayOutputToUser(self,df):
+    def displayOutputToUser(self, df):
         import tkinter as tk
         from tkinter import messagebox
         root = tk.Tk()
 
-        #user_flag=False
+        # user_flag=False
 
         # Function to handle button click
         def button_click_confirm():
             messagebox.showinfo("Confirmation", "User is OK with the dataframe!")
-            self.user_flag=True
+            self.user_flag = True
             root.destroy()
 
         def button_click_reject():
@@ -185,7 +228,8 @@ class findTable:
         # Start the Tkinter main loop
         root.mainloop()
 
-        #return user_flag
+        # return user_flag
+
 
 class testTables:
 
@@ -407,7 +451,8 @@ class testTables:
         except ValueError:
             return False
 
-if __name__=="__main__":
-    testerHandler=findTable()
-    outputvalue=testerHandler.findTablesInImageCV("testfiles\\hdfc.jpg")
+
+if __name__ == "__main__":
+    testerHandler = findTable()
+    outputvalue = testerHandler.findTablesInImageCV("testfiles\\hdfc.jpg")
     print(outputvalue)
