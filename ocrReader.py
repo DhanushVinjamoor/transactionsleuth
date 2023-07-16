@@ -52,6 +52,9 @@ class fileHandle:
 
 class findTable:
 
+    def fullTableExtractionAlgo(self,path_to_image):
+        pass
+
     def findTablesInImageCV(self, image_path):
         # This is the main function within this class to hook onto. Hook onto this function if you have a image
         # that you would like to analyse for tables
@@ -65,11 +68,18 @@ class findTable:
         # identified, that table is displayed to the user for confirmation, and if rejected, the image is croppped
         # and processed again.
 
-        # Convert the image to grayscale
+        # Convert the image to grayscale, as color information is unnecessary for our use case.
         gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
-        # Apply adaptive thresholding to obtain a binary image
-        _, binary = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY_INV | cv2.THRESH_OTSU)
+        # Apply adaptive thresholding to obtain a binary image. The output is required to be unpacked, as the output
+        # is the threshold utilised and the processed imaged
+        _, binary = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+
+        # Since almost all bank statements will be black text on a white background, this is inverted in order to
+        # identify contours more easily
+        inverted_image = cv2.bitwise_not(binary)
+
+        dilated_image = cv2.dilate(inverted_image, None, iterations=5)
 
         # Find contours in the binary image in cv2, contours are basically an outline of an object, which all have
         # the same 'intensity'. Finding contours are best applied on binary images, hence the above change
