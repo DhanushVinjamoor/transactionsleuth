@@ -44,8 +44,7 @@ class fileHandle:
             else:
                 autoRecognitionHandler = findTable()
                 testingClassHandler = testTables()
-                output = autoRecognitionHandler.crop_and_process_image(userRecognitionHandler.output_path, 0, 0, 0, 0,
-                                                                       testingClassHandler,"7737")
+                output = autoRecognitionHandler.columnReader("temp_directory", userRecognitionHandler.column_counter)
                 return output
 
 
