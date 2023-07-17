@@ -1,6 +1,7 @@
 import os
 
 import pandas as pd
+import pytesseract
 from fuzzywuzzy import fuzz
 import cv2
 
@@ -9,16 +10,15 @@ import cv2
 
 class fileHandle:
 
-    def __init__(self):
-        pass
-
     def pdfTestingHandler(self,pdf_path,mode="self"):
+        # todo add a method to split pages of pdfs without poppler
         pass
 
     def imagesTestingHandler(self, image_path: str, mode="self"):
         if mode == "self":
             autoRecognitionHandler = findTable()
-            outputvalue = autoRecognitionHandler.findTablesInImageCV(image_path)
+            outputvalue = autoRecognitionHandler.fullTableExtractionAlgo(image_path)
+            print(outputvalue)
             if outputvalue[0]:
                 return outputvalue
             else:
@@ -26,12 +26,11 @@ class fileHandle:
 
                 userRecognitionHandler = UIC.userCropTable(image_path)
 
-                if userRecognitionHandler.output_path is None:
+                if userRecognitionHandler.output_path is None or userRecognitionHandler.column_counter is None:
                     return [False]
                 else:
                     testingClassHandler = testTables()
-                    output = autoRecognitionHandler.crop_and_process_image(userRecognitionHandler.output_path, 0, 0, 0,
-                                                                           0, testingClassHandler,"7737")
+                    output = autoRecognitionHandler.columnReader("temp_directory", userRecognitionHandler.column_counter)
                     return output
 
 
@@ -40,7 +39,7 @@ class fileHandle:
 
             userRecognitionHandler = UIC.userCropTable(image_path)
 
-            if userRecognitionHandler.output_path is None:
+            if userRecognitionHandler.output_path is None or userRecognitionHandler.column_counter is None:
                 return [False]
             else:
                 autoRecognitionHandler = findTable()
@@ -53,7 +52,113 @@ class fileHandle:
 class findTable:
 
     def fullTableExtractionAlgo(self,path_to_image):
-        pass
+        import OcrToTableTool as ottt
+        import TableExtractor as te
+        import TableLinesRemover as tlr
+        import cv2
+
+        table_extractor = te.TableExtractor(path_to_image)
+        perspective_corrected_image = table_extractor.execute()
+        #cv2.imshow("perspective_corrected_image", perspective_corrected_image)
+
+        lines_remover = tlr.TableLinesRemover(perspective_corrected_image)
+        image_without_lines = lines_remover.execute()
+        #cv2.imshow("image_without_lines", image_without_lines)
+
+        ocr_tool = ottt.OcrToTableTool(image_without_lines, perspective_corrected_image)
+        self_identification_protocol_output_filename=ocr_tool.execute()
+
+        ### Loop the data lines
+        with open(self_identification_protocol_output_filename, 'r') as temp_f:
+            # get No of columns in each line
+            col_count = [len(l.split(",")) for l in temp_f.readlines()]
+
+        ### Generate column names  (names will be 0, 1, 2, ..., maximum columns - 1)
+        column_names = [i for i in range(0, max(col_count))]
+
+        with open(self_identification_protocol_output_filename,"r") as self_ocr_file:
+            possible_df=pd.read_csv(self_ocr_file,header=None, delimiter=",", names=column_names)
+
+        testing_class = testTables()
+
+        output_of_testingclass = testing_class.identifyTableDimensions(possible_df)
+
+        # The output is in the form of a list, with the index 0 always being a boolean value, which is set to True if
+        # a match has been reached, and False if not. The index 1 is a list, with the start and ending roiw values of
+        # identified dataframes
+
+        if output_of_testingclass[0]:
+            # Delete the cropped image
+            for start, end in output_of_testingclass[1]:
+                # todo add a function to output the dataframe and get confirmation from the user
+                print(possible_df[start:end])
+                self.displayOutputToUser(possible_df[start:end])
+
+                if self.user_flag:
+                    # os.remove('processed_image.jpg')
+                    return [True, possible_df[start:end]]
+            # if none of the identified tables in the above function satisfy user requirements, return false
+            return [False]
+        else:
+            # Delete the cropped image
+            # os.remove('processed_image.jpg')
+            return [False]
+
+
+    def columnReader(self, output_directory, column_counter):
+        # This is the function to open each of the cropped columns identified by the user, convert it into a dataframe, and merge them into a single dataframe.
+
+
+
+        all_columns_list=[]
+
+        # todo make sure the column iteration logic is sound
+        for current_column in range(1,column_counter):
+
+            # The string variable needs to be within the loop so that it can be reset
+            cropped_image_path = ''
+
+            if not output_directory is None:
+                cropped_image_path=cropped_image_path+output_directory+'\\'
+
+            cropped_image_path=cropped_image_path+str(current_column)+'.jpg'
+
+            column_image=cv2.imread(cropped_image_path)
+
+            column_raw_string=pytesseract.image_to_string(column_image)
+
+            #print(column_raw_string)
+
+            column_raw_string=column_raw_string.split("\n")
+
+            column_raw_string=pd.DataFrame(column_raw_string)
+
+            #print(column_raw_string)
+
+            all_columns_list.append(column_raw_string)
+
+        self.columnAnalyser(all_columns_list)
+
+    def columnAnalyser(self,dataframes:list):
+
+        full_dataframe = pd.DataFrame()
+
+        col_num=0
+        # Iterate over the list of DataFrames
+        for df in dataframes:
+            # Check the column count and row count of the DataFrame
+            num_columns = len(df.columns)
+            num_rows = len(df)
+
+            # Append DataFrame to new DataFrame if it has only one column
+            if num_columns == 1:
+                column_name = df.columns[0]
+                full_dataframe[str(col_num)] = df[column_name]
+                col_num+=1
+
+        self.output_handler(flag="spreadsheet", dataframes=[full_dataframe])
+
+
 
     def findTablesInImageCV(self, image_path):
         # This is the main function within this class to hook onto. Hook onto this function if you have a image
@@ -174,20 +279,12 @@ class findTable:
         else:
             possible_df=self.scan_image(original_image,count)
 
-        # Perform some operations on the cropped image
-        # processed_image = cv2.cvtColor(cropped_image, cv2.COLOR_BGR2GRAY)
-        # processed_image = cv2.GaussianBlur(processed_image, (5, 5), 0)
-
-        # Save the processed image
-        # cv2.imwrite('processed_image.jpg', cropped_image)
-
-        # convert to df and test for headers
-
 
         # The tests are very similar to the tests performed on pdfs and csvs, please refer the same for detailed
         # documentation
 
         output_of_testingclass = testing_class.identifyTableDimensions(possible_df)
+
         # The output is in the form of a list, with the index 0 always being a boolean value, which is set to True if
         # a match has been reached, and False if not. The index 1 is a list, with the start and ending roiw values of
         # identified dataframes
@@ -245,7 +342,7 @@ class findTable:
 
         # return user_flag
 
-    def output_handler(self,flag:str,dataframes:list,outputpath="output"):
+    def output_handler(self,flag:str,dataframes:list,outputpath="final_output"):
         if flag.lower()=="print":
             for dataframe in dataframes:
                 print(dataframe)
