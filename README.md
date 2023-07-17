@@ -8,9 +8,9 @@ Development of code to find bank transactions within files
 
 ## Documentation
 
-Code to take in a file, identify the table containing bank transactions in it, and then return those transactions as a dataframe. Currently, csv, xlsx, xls and pdfs are supported. Note that reading pdfs is very experimental.
+Code to take in a file, identify the table containing bank transactions in it, and then return those transactions as a dataframe. Currently, csv, xlsx, xls, pdfs and images(jpg,png) are supported. Warning! - Note that reading images is very experimental, and will not provide the best results. This is because it is built on top of tesseract ocr, which while excellent, is pretty old. Replace references to tesseract with a newer ocr model to provide better results.
 
-The tabula-py, re and pandas modules are required to be installed for this program to run.
+The tabula-py, re, pandas, numpy, cv, and pytesseract modules are required to be installed for this program to run.Tesseract ocr from Google also needs to be installed. I have used the default installation path of tesseract ocr in my code, modify the code to account for any changes in the installation paths.
 
 The transactions_table_identifier.py is the main file, which contains the class to be called to utilise the program.
 
@@ -18,6 +18,11 @@ Call the mainHandler method with the path of the file and the password. If there
 
 For output, you can pass the results of the mainHandler method to the output_handler method. set output flag to print to print out the results, spreadsheet to get it in spreadsheet format. The filetype under spreadsheet flag depends on the number of tables identified, if there is one, it will be csv, if more than one, it will be in xlsx. if the output is False, it means no tables were identified.
 
+## Known bugs
+
+1. While cropping columns, sometimes pressing 'c' is required to be done twice before the crop takes effect.
+2. Saving the base image anywhere else apart from the root of the executing files causes errors.
+3. Images with thinner borders and thin letters may cause errors in automatic detection of tables, cince dilating and eroding the image 5 times causes contours to loose sharpness.
 
 
 ## sample usage
