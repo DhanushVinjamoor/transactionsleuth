@@ -12,6 +12,8 @@ Code to take in a file, identify the table containing bank transactions in it, a
 
 The tabula-py, re, pandas, numpy, cv, and pytesseract modules are required to be installed for this program to run.Tesseract ocr from Google also needs to be installed. I have used the default installation path of tesseract ocr in my code, modify the code to account for any changes in the installation paths.
 
+The ocr programs uses code developed by livefiredev as a base.
+
 The transactions_table_identifier.py is the main file, which contains the class to be called to utilise the program.
 
 Call the mainHandler method with the path of the file and the password. If there are no passwords,do not provide the password argument. Note that passwords only work with pdf files. if you have csv or excel files with passwords, use the encryption module of Excel to remove the encryption, or alternatively,use one of the online solutions available.
