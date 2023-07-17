@@ -75,7 +75,10 @@ class handle_by_filetype:
                 return tables_list[1]
             else:
                 return False
-
+        elif extension==".jpg" or extension==".png" or extension == ".img":
+            import ocrReader
+            ocrHandler=ocrReader.fileHandle()
+            output=ocrHandler.imagesTestingHandler(filepath)
         else:
             raise TypeError
 
